@@ -7,14 +7,12 @@ import {
   Progress,
   RadioGroup,
   Radio,
-  SimpleGrid,
   Stack,
   Stepper,
   Text,
   Title,
 } from '@mantine/core';
 import type { NextPage } from 'next';
-import next from 'next';
 
 /**
  * Learning Style Assessment question content
@@ -108,6 +106,41 @@ const Learn: NextPage = () => {
       .catch((error) => console.warn(error));
   };
 
+  const TheSteps = () => (
+    <Box component="section" sx={{ marginBottom: 50, marginTop: 75 }}>
+      <Group position="apart">
+        <Stepper.Step
+          label="Culuture Fit"
+          state="stepInactive"
+          allowStepClick={false}
+        >
+          Culture fit
+        </Stepper.Step>
+        <Stepper.Step
+          label="Aptitude"
+          state="stepInactive"
+          allowStepClick={false}
+        >
+          Aptitude
+        </Stepper.Step>
+        <Stepper.Step
+          label="Psychometric"
+          state="stepInactive"
+          allowStepClick={false}
+        >
+          Psychometric
+        </Stepper.Step>
+        <Stepper.Step
+          label="Learning Style"
+          state="stepProgress"
+          allowStepClick={false}
+        >
+          Learning style
+        </Stepper.Step>
+      </Group>
+    </Box>
+  );
+
   const TheStart = () => (
     <Button onClick={handleStart} variant="filled" loading={hasStarted}>
       Start
@@ -154,39 +187,7 @@ const Learn: NextPage = () => {
 
   return (
     <>
-      <Box component="section" sx={{ marginBottom: 50, marginTop: 75 }}>
-        <Group position="apart">
-          <Stepper.Step
-            label="Culuture Fit"
-            state="stepInactive"
-            allowStepClick={false}
-          >
-            Culture fit
-          </Stepper.Step>
-          <Stepper.Step
-            label="Aptitude"
-            state="stepInactive"
-            allowStepClick={false}
-          >
-            Aptitude
-          </Stepper.Step>
-          <Stepper.Step
-            label="Psychometric"
-            state="stepInactive"
-            allowStepClick={false}
-          >
-            Psychometric
-          </Stepper.Step>
-          <Stepper.Step
-            label="Learning Style"
-            state="stepProgress"
-            allowStepClick={false}
-          >
-            Learning style
-          </Stepper.Step>
-        </Group>
-      </Box>
-
+      <TheSteps />
       <main>
         <Title order={1} sx={{ marginBottom: '.5em' }}>
           Learning style

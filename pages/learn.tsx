@@ -4,8 +4,10 @@ import {
   Box,
   Button,
   Group,
+  Progress,
   RadioGroup,
   Radio,
+  SimpleGrid,
   Stack,
   Stepper,
   Text,
@@ -113,7 +115,17 @@ const Learn: NextPage = () => {
   );
   const TheQuestion = () => (
     <>
-      <Stack spacing="xl" sx={{ marginTop: 50, marginBottom: 50 }}>
+      <Stack spacing="xl" sx={{ marginTop: 50, marginBottom: 38 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Text sx={{ marginRight: 24 }}>Progress</Text>
+          <Progress
+            value={progressPercent()}
+            radius="md"
+            sx={{ flexGrow: 1 }}
+          />
+          <Text sx={{ marginLeft: 12 }}>{progressPercent()}%</Text>
+        </Box>
+
         <Text size="lg" align="center">
           {currentQuestion().text}
         </Text>

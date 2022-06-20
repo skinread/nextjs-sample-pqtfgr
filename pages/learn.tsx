@@ -16,6 +16,7 @@ import useLearningStyle, {
   useAssessmentLoad,
   useAssessmentStart,
 } from '../hooks/useLearningStyle';
+// import useLoadAssessment from '../hooks/useSampleFetch';
 import type { NextPage } from 'next';
 
 const Learn: NextPage = () => {
@@ -32,8 +33,6 @@ const Learn: NextPage = () => {
     progressPercent,
   } = useLearningStyle();
 
-  // action({ type: 'answer', payload: { response: userReponse } });
-
   const handleBegin = () => {
     if (hasStarted) return;
 
@@ -46,6 +45,11 @@ const Learn: NextPage = () => {
         answers,
       },
     });
+    useAssessmentStart();
+  };
+
+  const handleResponse = (value: string) => {
+    action({ type: 'answer', payload: { response: value } });
   };
 
   const handleNext = () => {
@@ -108,7 +112,7 @@ const Learn: NextPage = () => {
           {currentQuestion.text}
         </Text>
 
-        <RadioGroup value={userReponse} onChange={setUserResponse} size="md">
+        <RadioGroup value={userReponse} onChange={handleResponse} size="md">
           {answers.map((radio) => (
             <Radio
               value={`${radio.value}`}

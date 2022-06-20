@@ -1,5 +1,4 @@
-import { useReducer, useState } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -12,98 +11,48 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import useLearningStyle, {
+  useAssessmentAnswer,
+  useAssessmentLoad,
+  useAssessmentStart,
+} from '../hooks/useLearningStyle';
 import type { NextPage } from 'next';
 
-/**
- * Learning Style Assessment question content
- */
-export interface QuestionType {
-  order: number;
-  text: string;
-  category: string;
-}
-
-/**
- * Learning Style Assessment answer content
- */
-export interface AnswerType {
-  text: string;
-  value: number;
-}
-
-const host = 'https://cc1db260-5795-4df5-a25b-8a994b57d974.mock.pstmn.io/';
-const endpoints = {
-  load: 'assessment',
-  start: 'start',
-  submit: 'answer',
-  current: 'current',
-};
-
-const defaultQuestion: QuestionType = { text: '', order: 0, category: '' };
-
 const Learn: NextPage = () => {
-  const [questions, setQuestions] = useState([defaultQuestion]);
-  const [answers, setAnswers] = useState<AnswerType[]>([]);
-  const [counter, setCounter] = useState(1);
-  const [hasStarted, setHasStarted] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [userReponse, setUserResponse] = useState<string | undefined>(
-    undefined
-  );
+  const [userReponse, setUserResponse] = useState<string | undefined>();
+  const {
+    action,
+    questions,
+    answers,
+    counter,
+    hasStarted,
+    isLoaded,
+    isSaving,
+    currentQuestion,
+    progressPercent,
+  } = useLearningStyle();
 
-  const currentQuestion = () =>
-    questions.find((q) => q.order === counter) || defaultQuestion;
-  const progressPercent = () => {
-    if (!isLoaded) return 0;
-    return Math.round((counter / questions.length) * 100) - 1;
-  };
+  // action({ type: 'answer', payload: { response: userReponse } });
 
-  const handleStart = async () => {
+  const handleBegin = () => {
     if (hasStarted) return;
-    setHasStarted(true);
 
-    // load assessment
-    axios
-      .get(`${host}${endpoints.load}`)
-      .then((response) => {
-        const { questions, answers } = response.data;
-        setQuestions(questions);
-        setAnswers(answers);
-      })
-      .catch((error) => {
-        console.warn(error);
-      });
-
-    // call start api
-    axios
-      .post(`${host}${endpoints.start}`)
-      .then((response) => {
-        const { answers, startDate } = response.data;
-        console.info('assessment started', startDate, answers);
-        setIsLoaded(true);
-      })
-      .catch((error) => {
-        console.warn(error);
-      });
+    action({ type: 'start' });
+    const { questions, answers } = useAssessmentLoad();
+    action({
+      type: 'load',
+      payload: {
+        questions,
+        answers,
+      },
+    });
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (isSaving) return;
-    setIsSaving(true);
-    console.info(`sending response ${userReponse} for quesiton #${counter}`);
 
-    axios
-      .post(`${host}${endpoints.submit}`, {
-        questionOrder: counter,
-        response: userReponse,
-      })
-      .then(() => {
-        setCounter(counter + 1);
-        setIsSaving(false);
-        setUserResponse(undefined);
-      })
-      .catch((error) => console.warn(error));
+    action({ type: 'next' });
+    action({ type: 'saved' });
   };
 
   const TheSteps = () => (
@@ -142,7 +91,7 @@ const Learn: NextPage = () => {
   );
 
   const TheStart = () => (
-    <Button onClick={handleStart} variant="filled" loading={hasStarted}>
+    <Button onClick={handleBegin} variant="filled" loading={hasStarted}>
       Start
     </Button>
   );
@@ -151,16 +100,12 @@ const Learn: NextPage = () => {
       <Stack spacing="xl" sx={{ marginTop: 50, marginBottom: 38 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Text sx={{ marginRight: 24 }}>Progress</Text>
-          <Progress
-            value={progressPercent()}
-            radius="md"
-            sx={{ flexGrow: 1 }}
-          />
-          <Text sx={{ marginLeft: 12 }}>{progressPercent()}%</Text>
+          <Progress value={progressPercent} radius="md" sx={{ flexGrow: 1 }} />
+          <Text sx={{ marginLeft: 12 }}>{progressPercent}%</Text>
         </Box>
 
         <Text size="lg" align="center">
-          {currentQuestion().text}
+          {currentQuestion.text}
         </Text>
 
         <RadioGroup value={userReponse} onChange={setUserResponse} size="md">

@@ -20,13 +20,13 @@ export interface AnswerType {
 
 type Action =
   | { type: 'start' }
-  | { type: 'ready' }
+  | { type: 'saved' }
+  | { type: 'next' }
   | {
       type: 'load';
       payload: { questions: QuestionType[]; answers: AnswerType[] };
     }
-  | { type: 'answer'; payload: { response: string } }
-  | { type: 'next'; payload: { answer: string } };
+  | { type: 'answer'; payload: { response?: string } };
 
 const host = 'https://cc1db260-5795-4df5-a25b-8a994b57d974.mock.pstmn.io/';
 const endpoints = {
@@ -39,10 +39,10 @@ const endpoints = {
 /**
  * Load Learning Style assessment
  */
-export const useAssessmentLoad = () => {
+export function useAssessmentLoad() {
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState([defaultQuestion]);
-  const [answers, setAnswers] = useState({} as AnswerType);
+  const [answers, setAnswers] = useState([] as AnswerType[]);
 
   useEffect(() => {
     axios
@@ -66,7 +66,7 @@ export const useAssessmentLoad = () => {
     answers,
     loading,
   };
-};
+}
 
 /**
  * Start Learning Style assessment
@@ -145,8 +145,13 @@ const reducer = (state: typeof initialState, action: Action) => {
         answers: action.payload.answers,
         isLoaded: true,
       };
-    case 'ready':
-      return { ...state, isSaving: false };
+    case 'saved':
+      return {
+        ...state,
+        counter: state.counter + 1,
+        userResponse: undefined,
+        isSaving: false,
+      };
     case 'answer':
       return { ...state, userResponse: action.payload.response };
     case 'next':

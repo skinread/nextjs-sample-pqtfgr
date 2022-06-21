@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import {
   Box,
   Button,
@@ -32,6 +33,7 @@ export const LearningStyle = () => {
     currentQuestion,
     progressPercent,
   } = useAssessment();
+  const { t } = useTranslation();
 
   const doLoad = () => {
     dispatch({ type: 'START' });
@@ -90,7 +92,7 @@ export const LearningStyle = () => {
 
   const BeforeStart = () => (
     <Button onClick={handleStart} variant="filled" loading={hasStarted}>
-      Start
+      {t('label.start')}
     </Button>
   );
 
@@ -124,7 +126,7 @@ export const LearningStyle = () => {
         disabled={!currentResponse}
         loading={isSaving}
       >
-        Next
+        {t('label.next')}
       </Button>
     </>
   );

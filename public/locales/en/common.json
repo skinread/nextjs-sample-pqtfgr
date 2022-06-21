@@ -1,12 +1,12 @@
 {
-  "labels": {
+  "label": {
     "back": "Back",
     "start": "Start",
     "next": "Next",
     "progress": "Progress",
     "learn-more": "Learn more"
   },
-  "steps": {
+  "assessment": {
     "culture-fit": "Culture Fit",
     "aptitude": "Aptitude",
     "psychometric": "Psychometric",

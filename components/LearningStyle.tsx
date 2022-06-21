@@ -34,6 +34,7 @@ export const LearningStyle = () => {
   } = useAssessment();
 
   const doLoad = () => {
+    dispatch({ type: 'START' });
     axios
       .get(`${host}${endpoints.load}`)
       .then((response) => {
@@ -47,7 +48,6 @@ export const LearningStyle = () => {
   };
 
   const doStart = () => {
-    dispatch({ type: 'START' });
     axios
       .post(`${host}${endpoints.start}`)
       .then((response) => {

@@ -1,7 +1,18 @@
 import { Box, Text, Title } from '@mantine/core';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import { AssesmentStatus } from '../components/AssessmentStatus';
 import { LearningStyle } from '../components/LearningStyle';
 import type { NextPage } from 'next';
+
+export async function getStaticProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['learningstyle'])),
+      // Will be passed to the page component as props
+    },
+  };
+}
 
 const Learn: NextPage = () => {
   return (

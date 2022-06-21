@@ -1,0 +1,15 @@
+{
+  "labels": {
+    "back": "Revenir",
+    "start": "Commencer",
+    "next": "Continuez",
+    "progress": "Progrès",
+    "learn-more": "En savoir plus"
+  },
+  "steps": {
+    "culture-fit": "Adéquation Culturelle",
+    "aptitude": "Aptitude",
+    "psychometric": "Psychométriques",
+    "learning-style": "Style D’Apprentissage"
+  }
+}

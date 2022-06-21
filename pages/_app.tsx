@@ -1,4 +1,5 @@
 import { GetServerSidePropsContext } from 'next';
+import { appWithTranslation } from 'next-i18next';
 import { useState } from 'react';
 import { AppProps } from 'next/app';
 // import { getCookie, setCookies } from 'cookies-next';
@@ -11,7 +12,7 @@ import {
 } from '@mantine/core';
 // import { NotificationsProvider } from '@mantine/notifications';
 
-export default function App(props: AppProps & { colorScheme: ColorScheme }) {
+const App = (props: AppProps & { colorScheme: ColorScheme }) => {
   const { Component, pageProps } = props;
   const [colorScheme, setColorScheme] = useState<ColorScheme>(
     props.colorScheme
@@ -51,7 +52,9 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
       </ColorSchemeProvider>
     </>
   );
-}
+};
+
+export default appWithTranslation(App);
 
 // App.getInitialProps = ({ ctx }: { ctx: GetServerSidePropsContext }) => ({
 //   colorScheme: getCookie('mantine-color-scheme', ctx) || 'light',

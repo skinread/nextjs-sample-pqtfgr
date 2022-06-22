@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from 'react';
+import { useMemo, useReducer } from "react";
 
 /**
  * Learning Style Assessment question content
@@ -18,18 +18,18 @@ export interface AnswerType {
 }
 
 type Action =
-  | { type: 'START' }
-  | { type: 'SAVING' }
-  | { type: 'NEXT' }
+  | { type: "START" }
+  | { type: "SAVING" }
+  | { type: "NEXT" }
   | {
-      type: 'LOAD';
+      type: "LOAD";
       payload: { questions: QuestionType[]; answers: AnswerType[] };
     };
 
 export const defaultQuestion: QuestionType = {
-  text: '',
+  text: "",
   order: 0,
-  category: '',
+  category: "",
 };
 export const initialState = {
   questions: [defaultQuestion],
@@ -42,30 +42,30 @@ export const initialState = {
 
 const reducer = (state: typeof initialState, action: Action) => {
   switch (action.type) {
-    case 'START':
+    case "START":
       return { ...state, hasStarted: true };
-    case 'LOAD':
+    case "LOAD":
       const { questions, answers } = action.payload;
-      console.info('loading assessment', questions, answers);
+      console.info("loading assessment", questions, answers);
       return {
         ...state,
         questions,
         answers,
         isLoaded: true,
       };
-    case 'SAVING':
+    case "SAVING":
       return {
         ...state,
         isSaving: true,
       };
-    case 'NEXT':
+    case "NEXT":
       return {
         ...state,
         counter: state.counter + 1,
         isSaving: false,
       };
     default:
-      throw new Error(`Invalid action type: ${action.type}`);
+      throw new Error(`Invalid action type: ${(<Action>action).type}`);
   }
 };
 

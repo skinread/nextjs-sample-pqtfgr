@@ -7,7 +7,7 @@ import { AssesmentStatus } from '../components/AssessmentStatus';
 import { LearningStyle } from '../components/LearningStyle';
 import type { NextPage } from 'next';
 
-export async function getStaticProps({ locale }) {
+export async function getStaticProps({ locale }: { locale: string }) {
   return {
     props: {
       ...(await serverSideTranslations(locale, ['common', 'learningstyle'])),
@@ -16,14 +16,14 @@ export async function getStaticProps({ locale }) {
   };
 }
 
-const LanguageSwitcher = ({ currentLocale }: { currentLocale: string }) => (
+const LanguageSwitcher = ({ currentLocale }: { currentLocale?: string }) => (
   <Box sx={{ marginTop: 16 }}>
-    {currentLocale.includes('en') && (
+    {currentLocale?.includes('en') && (
       <Link href="/learn" locale="fr">
         <Button variant="light">Français</Button>
       </Link>
     )}
-    {currentLocale.includes('fr') && (
+    {currentLocale?.includes('fr') && (
       <Link href="/learn" locale="en">
         <Button variant="light">English</Button>
       </Link>

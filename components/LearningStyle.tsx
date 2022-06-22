@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'next-i18next';
+import { useMutation, useQuery } from 'react-query';
 import {
   Box,
   Button,
@@ -10,75 +11,96 @@ import {
   Progress,
   Stack,
 } from '@mantine/core';
-import useAssessment from '../hooks/useAssessment';
 
-export const host =
-  'https://cc1db260-5795-4df5-a25b-8a994b57d974.mock.pstmn.io/';
-export const endpoints = {
-  load: 'assessment',
-  start: 'start',
-  submit: 'answer',
-  current: 'current',
+const initialAssessmentData = {
+  answers: [{
+    value: 0,
+    text: '',
+  }],
+  questions: [{
+    text: '',
+    order: 0,
+    category: '',
+  }]
+};
+
+type AssessmentData = typeof initialAssessmentData;
+type AnswerPostData = {
+  questionOrder: number;
+  response: string;
+}
+
+const endpoint =
+'https://cc1db260-5795-4df5-a25b-8a994b57d974.mock.pstmn.io';
+
+function useAssessmentQA({ hasStarted }: { hasStarted: boolean }) {
+  const url = `${endpoint}/assessment`;
+  return useQuery(
+    ['load'],
+    async (): Promise<AssessmentData> => {
+      const { data } = await axios.get(url);
+      return data;
+    },
+    { 
+      enabled: hasStarted
+    }
+  );
+}
+
+function useStartAssessment({ hasLoaded }: { hasLoaded: boolean }) {
+  const url = `${endpoint}/start`;
+  return useQuery(
+    ['start'],
+    async (): Promise<any> => {
+      const { data } = await axios.post(url);
+      return data;
+    },
+    {
+      enabled: hasLoaded
+    }
+  );
+}
+
+// function useSubmitAnswer(answer: AnswerPostData){
+  //   return useMutation(async (): Promise<any> => await axios.post(url, answer));
+  // }
+
+const postAnswer = async (answer: AnswerPostData): Promise<any> => {
+  const url = `${endpoint}/answer`;
+  return await axios.post(url, answer);
 };
 
 export const LearningStyle = () => {
+  const [hasStarted, setHasStarted] = useState(false);
+  const [counter, setCounter] = useState(0);
   const [currentResponse, setCurrentResponse] = useState<string | undefined>();
-  const {
-    dispatch,
-    answers,
-    counter,
-    hasStarted,
-    isLoaded,
-    isSaving,
-    currentQuestion,
-    progressPercent,
-  } = useAssessment();
+  
+  const { data: assessmentData, isSuccess: hasLoaded } = useAssessmentQA({ hasStarted });
+  const startAssessment = useStartAssessment({ hasLoaded });
+  const submitAnswer = useMutation(postAnswer, {
+    onSuccess: (data, variables) => {
+      console.info('submitted answer', variables, 'with response', data);
+      setCounter(counter + 1);
+    }
+  });
   const { t } = useTranslation();
+  
+  const { answers, questions } = assessmentData || initialAssessmentData;
+  const isActive = hasLoaded && startAssessment.isSuccess;
+  const isSaving = submitAnswer.isLoading;
+  
+  const progressPercent = useMemo(() => {
+    if (counter < 1) return 0;
+    return Math.round((counter / questions.length) * 100) - 1;
+  }, [counter, questions]);
 
-  const doLoad = () => {
-    dispatch({ type: 'START' });
-    axios
-      .get(`${host}${endpoints.load}`)
-      .then((response) => {
-        const { questions, answers } = response.data;
-        dispatch({ type: 'LOAD', payload: { questions, answers } });
-        doStart();
-      })
-      .catch((error) => {
-        console.warn(error);
-      });
-  };
-
-  const doStart = () => {
-    axios
-      .post(`${host}${endpoints.start}`)
-      .then((response) => {
-        const { answers, startDate } = response.data;
-        console.info('assessment started', startDate, answers);
-      })
-      .catch((error) => {
-        console.warn(error);
-      });
-  };
-
-  const submitAnswer = (order: number, response: string) => {
-    dispatch({ type: 'SAVING' });
-    console.info(`sending response ${response} for quesiton #${order}`);
-    axios
-      .post(`${host}${endpoints.submit}`, {
-        questionOrder: order,
-        response,
-      })
-      .then((response) => {
-        setCurrentResponse(undefined);
-        dispatch({ type: 'NEXT' });
-      })
-      .catch((error) => console.warn(error));
-  };
+  const currentQuestion = useMemo(
+    () => questions?.find(q => q.order === counter),
+    [counter, questions],
+  );
 
   const handleStart = () => {
-    if (hasStarted) return;
-    doLoad();
+    !hasStarted && setHasStarted(true);
   };
 
   const handleResponse = (value: string) => {
@@ -86,11 +108,11 @@ export const LearningStyle = () => {
   };
 
   const handleNext = () => {
-    if (isSaving || !currentResponse) return;
-    submitAnswer(counter, currentResponse);
+    if (!currentResponse || isSaving) return;
+    submitAnswer.mutate({questionOrder: counter, response: currentResponse});
   };
 
-  const BeforeStart = () => (
+  const AssessmentBegin = () => (
     <Button onClick={handleStart} variant="filled" loading={hasStarted}>
       {t('label.start')}
     </Button>
@@ -106,11 +128,11 @@ export const LearningStyle = () => {
         </Box>
 
         <Text size="lg" align="center">
-          {currentQuestion.text}
+          {currentQuestion?.text}
         </Text>
 
         <RadioGroup value={currentResponse} onChange={handleResponse} size="md">
-          {answers.map((radio) => (
+          {answers?.map(radio => (
             <Radio
               value={`${radio.value}`}
               label={radio.text}
@@ -131,5 +153,5 @@ export const LearningStyle = () => {
     </>
   );
 
-  return isLoaded ? <Assessment /> : <BeforeStart />;
+  return isActive ? <Assessment /> : <AssessmentBegin />;
 };

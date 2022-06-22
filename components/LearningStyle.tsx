@@ -30,8 +30,7 @@ type AnswerPostData = {
   response: string;
 }
 
-const endpoint =
-'https://cc1db260-5795-4df5-a25b-8a994b57d974.mock.pstmn.io';
+const endpoint = 'https://cc1db260-5795-4df5-a25b-8a994b57d974.mock.pstmn.io';
 
 function useAssessmentQA({ hasStarted }: { hasStarted: boolean }) {
   const url = `${endpoint}/assessment`;
@@ -61,10 +60,6 @@ function useStartAssessment({ hasLoaded }: { hasLoaded: boolean }) {
   );
 }
 
-// function useSubmitAnswer(answer: AnswerPostData){
-  //   return useMutation(async (): Promise<any> => await axios.post(url, answer));
-  // }
-
 const postAnswer = async (answer: AnswerPostData): Promise<any> => {
   const url = `${endpoint}/answer`;
   return await axios.post(url, answer);
@@ -81,7 +76,8 @@ export const LearningStyle = () => {
     onSuccess: (data, variables) => {
       console.info('submitted answer', variables, 'with response', data);
       setCounter(counter + 1);
-    }
+      setCurrentResponse(undefined);
+    },
   });
   const { t } = useTranslation();
   
@@ -95,12 +91,14 @@ export const LearningStyle = () => {
   }, [counter, questions]);
 
   const currentQuestion = useMemo(
-    () => questions?.find(q => q.order === counter),
+    () => questions.find(q => q.order === counter),
     [counter, questions],
   );
 
   const handleStart = () => {
-    !hasStarted && setHasStarted(true);
+    if (hasStarted) return;
+    setHasStarted(true);
+    setCounter(1);
   };
 
   const handleResponse = (value: string) => {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { GetServerSidePropsContext } from 'next';
 import { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 import { appWithTranslation } from 'next-i18next';
 // import { getCookie, setCookies } from 'cookies-next';
 import Head from 'next/head';
@@ -54,6 +55,7 @@ const App = (props: AppProps & { colorScheme: ColorScheme }) => {
             </Container>
           </MantineProvider>
         </ColorSchemeProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </>
   );

@@ -36,7 +36,7 @@ const initialAssessmentData = {
       category: '',
     },
   ],
-} as const;
+};
 
 type AssessmentData = z.infer<typeof assessmentValidator>;
 type AnswerPostData = {

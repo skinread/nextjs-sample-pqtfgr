@@ -1,17 +1,26 @@
 import axios from 'axios';
+import z from 'zod';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { useMutation, useQuery } from 'react-query';
-import {
-  Box,
-  Button,
-  Text,
-  RadioGroup,
-  Radio,
-  Progress,
-  Stack,
-} from '@mantine/core';
+import { Button, Text, RadioGroup, Radio, Stack } from '@mantine/core';
 import { ProgressBar } from './';
+
+const assessmentValidator = z.object({
+  answers: z
+    .object({
+      value: z.number(),
+      text: z.string(),
+    })
+    .array(),
+  questions: z
+    .object({
+      category: z.string(),
+      order: z.number(),
+      text: z.string(),
+    })
+    .array(),
+});
 
 const initialAssessmentData = {
   answers: [
@@ -29,7 +38,7 @@ const initialAssessmentData = {
   ],
 } as const;
 
-type AssessmentData = typeof initialAssessmentData;
+type AssessmentData = z.infer<typeof assessmentValidator>;
 type AnswerPostData = {
   questionOrder: number;
   response: string;
@@ -43,7 +52,7 @@ function useAssessmentQA({ hasStarted }: { hasStarted: boolean }) {
     ['load'],
     async (): Promise<AssessmentData> => {
       const { data } = await axios.get(url);
-      return data;
+      return assessmentValidator.parse(data);
     },
     {
       enabled: hasStarted,

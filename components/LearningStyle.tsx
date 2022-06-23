@@ -13,22 +13,26 @@ import {
 } from '@mantine/core';
 
 const initialAssessmentData = {
-  answers: [{
-    value: 0,
-    text: '',
-  }],
-  questions: [{
-    text: '',
-    order: 0,
-    category: '',
-  }]
-};
+  answers: [
+    {
+      value: 0,
+      text: '',
+    },
+  ],
+  questions: [
+    {
+      text: '',
+      order: 0,
+      category: '',
+    },
+  ],
+} as const;
 
 type AssessmentData = typeof initialAssessmentData;
 type AnswerPostData = {
   questionOrder: number;
   response: string;
-}
+};
 
 const endpoint = 'https://cc1db260-5795-4df5-a25b-8a994b57d974.mock.pstmn.io';
 
@@ -40,9 +44,9 @@ function useAssessmentQA({ hasStarted }: { hasStarted: boolean }) {
       const { data } = await axios.get(url);
       return data;
     },
-    { 
-      enabled: hasStarted
-    }
+    {
+      enabled: hasStarted,
+    },
   );
 }
 
@@ -55,23 +59,27 @@ function useStartAssessment({ hasLoaded }: { hasLoaded: boolean }) {
       return data;
     },
     {
-      enabled: hasLoaded
-    }
+      enabled: hasLoaded,
+    },
   );
 }
 
-const postAnswer = async (answer: AnswerPostData): Promise<any> => {
+async function postAnswer(answer: AnswerPostData): Promise<any> {
   const url = `${endpoint}/answer`;
   return await axios.post(url, answer);
-};
+}
 
 export const LearningStyle = () => {
-  const [hasStarted, setHasStarted] = useState(false);
+  // state
   const [counter, setCounter] = useState(0);
+  const [userStarted, setUserStarted] = useState(false);
   const [currentResponse, setCurrentResponse] = useState<string | undefined>();
-  
-  const { data: assessmentData, isSuccess: hasLoaded } = useAssessmentQA({ hasStarted });
-  const startAssessment = useStartAssessment({ hasLoaded });
+
+  // queries & hooks
+  const { isSuccess: hasLoaded, ...queryAssessment } = useAssessmentQA({
+    hasStarted: userStarted,
+  });
+  const queryStartAssessment = useStartAssessment({ hasLoaded });
   const submitAnswer = useMutation(postAnswer, {
     onSuccess: (data, variables) => {
       console.info('submitted answer', variables, 'with response', data);
@@ -80,42 +88,48 @@ export const LearningStyle = () => {
     },
   });
   const { t } = useTranslation();
-  
-  const { answers, questions } = assessmentData || initialAssessmentData;
-  const isActive = hasLoaded && startAssessment.isSuccess;
+
+  // reference values
+  const { answers, questions } = queryAssessment.data || initialAssessmentData;
+  const isActive = hasLoaded && queryStartAssessment.isSuccess;
   const isSaving = submitAnswer.isLoading;
-  
+
+  // calulated values
   const progressPercent = useMemo(() => {
     if (counter < 1) return 0;
     return Math.round((counter / questions.length) * 100) - 1;
   }, [counter, questions]);
-
   const currentQuestion = useMemo(
     () => questions.find(q => q.order === counter),
     [counter, questions],
   );
 
+  // event handlers
   const handleStart = () => {
-    if (hasStarted) return;
-    setHasStarted(true);
+    if (userStarted) return;
+    setUserStarted(true);
     setCounter(1);
   };
-
   const handleResponse = (value: string) => {
     setCurrentResponse(value);
   };
-
   const handleNext = () => {
     if (!currentResponse || isSaving) return;
-    submitAnswer.mutate({questionOrder: counter, response: currentResponse});
+    submitAnswer.mutate({ questionOrder: counter, response: currentResponse });
   };
 
+  /**
+   * initial component to begin the assessment
+   */
   const AssessmentBegin = () => (
-    <Button onClick={handleStart} variant="filled" loading={hasStarted}>
+    <Button onClick={handleStart} variant="filled" loading={userStarted}>
       {t('label.start')}
     </Button>
   );
 
+  /**
+   * active assessment component
+   */
   const Assessment = () => (
     <>
       <Stack spacing="xl" sx={{ marginTop: 50, marginBottom: 38 }}>

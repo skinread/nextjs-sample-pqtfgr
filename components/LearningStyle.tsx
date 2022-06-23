@@ -11,6 +11,7 @@ import {
   Progress,
   Stack,
 } from '@mantine/core';
+import { ProgressBar } from './';
 
 const initialAssessmentData = {
   answers: [
@@ -133,16 +134,10 @@ export const LearningStyle = () => {
   const Assessment = () => (
     <>
       <Stack spacing="xl" sx={{ marginTop: 50, marginBottom: 38 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Text sx={{ marginRight: 24 }}>Progress</Text>
-          <Progress value={progressPercent} radius="md" sx={{ flexGrow: 1 }} />
-          <Text sx={{ marginLeft: 12 }}>{progressPercent}%</Text>
-        </Box>
-
+        <ProgressBar label={t('label.progress')} percent={progressPercent} />
         <Text size="lg" align="center">
           {currentQuestion?.text}
         </Text>
-
         <RadioGroup value={currentResponse} onChange={handleResponse} size="md">
           {answers?.map(radio => (
             <Radio

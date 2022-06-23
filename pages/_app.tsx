@@ -1,7 +1,9 @@
-import { GetServerSidePropsContext } from 'next';
-import { appWithTranslation } from 'next-i18next';
 import { useState } from 'react';
+import { GetServerSidePropsContext } from 'next';
 import { AppProps } from 'next/app';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
+import { appWithTranslation } from 'next-i18next';
 // import { getCookie, setCookies } from 'cookies-next';
 import Head from 'next/head';
 import {
@@ -11,6 +13,8 @@ import {
   ColorSchemeProvider,
 } from '@mantine/core';
 // import { NotificationsProvider } from '@mantine/notifications';
+
+const queryClient = new QueryClient();
 
 const App = (props: AppProps & { colorScheme: ColorScheme }) => {
   const { Component, pageProps } = props;
@@ -36,20 +40,23 @@ const App = (props: AppProps & { colorScheme: ColorScheme }) => {
         <link rel="shortcut icon" href="/favicon.svg" />
       </Head>
 
-      <ColorSchemeProvider
-        colorScheme={colorScheme}
-        toggleColorScheme={toggleColorScheme}
-      >
-        <MantineProvider
-          theme={{ colorScheme }}
-          withGlobalStyles
-          withNormalizeCSS
+      <QueryClientProvider client={queryClient}>
+        <ColorSchemeProvider
+          colorScheme={colorScheme}
+          toggleColorScheme={toggleColorScheme}
         >
-          <Container>
-            <Component {...pageProps} />
-          </Container>
-        </MantineProvider>
-      </ColorSchemeProvider>
+          <MantineProvider
+            theme={{ colorScheme }}
+            withGlobalStyles
+            withNormalizeCSS
+          >
+            <Container>
+              <Component {...pageProps} />
+            </Container>
+          </MantineProvider>
+        </ColorSchemeProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </>
   );
 };
